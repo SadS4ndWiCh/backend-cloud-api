@@ -20,7 +20,7 @@ An API that serves as an simple cloud backup system.
        | - Email     |           | - User ID    |
        | - Password  |           + ------------ +
        + ----------- +
-               | *
+               | 1
                |              * + --------- + 1        * + ----------- +
                + -------------- |   FOLDER  | ---------- |     FILE    |
                                 + --------- +            + ----------- +
