@@ -1,6 +1,6 @@
 # 🥿 backend-cloud-api
 
-An API that serves as an simple cloud backup system.
+An API that serves as a simple cloud backup system.
 
 ## 🧵 Features
 
