@@ -22,7 +22,10 @@ export class AuthService {
 
     async createUser(payload: CreateUserDTO) {
         // TODO: hash the password
-        return this.prisma.user.create({ data: payload });
+        const user = await this.prisma.user.create({ data: payload });
+        await this.createSession(user.id);
+
+        return user;
     }
 
     async login(payload: LoginUserDTO) {
