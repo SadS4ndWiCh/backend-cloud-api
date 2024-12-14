@@ -13,6 +13,7 @@ import { PrismaService } from "src/providers/prisma/prisma.service";
 import { LocalBucketService } from "src/providers/localbucket/localbucket.service";
 
 import { UploadFileDTO } from "./files.dto";
+import { MEGABYTE } from "./files.constant";
 
 @Injectable()
 export class FilesService {
@@ -39,6 +40,10 @@ export class FilesService {
     }
 
     async uploadFile(ownerId: number, file: Express.Multer.File, data: UploadFileDTO) {
+        if (file.size > (200 * MEGABYTE)) {
+            throw new BadRequestException("file size must be at least 200MB");
+        }
+
         const folder = await this.prisma.folder.findUnique({ where: { id: Number(data.folderId) } });
         if (!folder) {
             throw new BadRequestException();
