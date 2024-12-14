@@ -39,7 +39,6 @@ export class AuthGuard implements CanActivate {
     }
 
     private extractSessionId(request: any) {
-        console.log(request.headers);
         return request.headers["x-session-id"];
     }
 }
