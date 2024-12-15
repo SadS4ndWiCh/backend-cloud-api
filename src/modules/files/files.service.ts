@@ -12,6 +12,8 @@ import {
 import { PrismaService } from "src/providers/prisma/prisma.service";
 import { LocalBucketService } from "src/providers/localbucket/localbucket.service";
 
+import { FolderVisibility } from "../folders/folders.constant";
+
 import { MoveFileDTO } from "./files.dto";
 import { MEGABYTE } from "./files.constant";
 
@@ -31,7 +33,7 @@ export class FilesService {
             throw new NotFoundException();
         }
 
-        if (file.folder.user_id !== userId) {
+        if (file.folder.visiblity === FolderVisibility.PRIVATE && file.folder.user_id !== userId) {
             throw new UnauthorizedException();
         }
 
@@ -50,7 +52,7 @@ export class FilesService {
             throw new NotFoundException();
         }
 
-        if (file.folder.user_id !== userId) {
+        if (file.folder.visiblity === FolderVisibility.PRIVATE && file.folder.user_id !== userId) {
             throw new UnauthorizedException();
         }
 

@@ -36,9 +36,10 @@ model Session {
 }
 
 model Folder {
-    id      Int    @id @default(autoincrement())
-    name    String
-    user_id Int
+    id        Int    @id @default(autoincrement())
+    name      String
+    visiblity Int    @default(0)
+    user_id   Int
 
     user User @relation(fields: [user_id], references: [id])
 
