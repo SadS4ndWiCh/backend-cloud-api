@@ -6,7 +6,7 @@ An API that serves as a simple cloud backup system.
 
 - Authentication;
 - Upload files up to 200MB;
-- Download uploaded files; and
+- Download uploaded files;
 - Create folders to hold files;
 
 ## 🎗️ Entities
