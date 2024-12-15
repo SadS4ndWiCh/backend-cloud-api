@@ -21,13 +21,14 @@ An API that serves as a simple cloud backup system.
        | - Password  |           + ------------ +
        + ----------- +
                | 1
-               |              * + --------- + 1        * + ----------- +
-               + -------------- |   FOLDER  | ---------- |     FILE    |
-                                + --------- +            + ----------- +
-                                | - ID      |            | - ID        |
-                                | - Name    |            | - File Path |
-                                | - User ID |            | - Folder ID |
-                                + --------- +            + ----------- +
+               |              * + ------------ + 1        * + ----------- +
+               + -------------- |   FOLDER     | ---------- |     FILE    |
+                                + ------------ +            + ----------- +
+                                | - ID         |            | - ID        |
+                                | - Name       |            | - File Path |
+                                | - Visibility |            | - Folder ID |
+                                | - User ID    |            + ----------- +
+                                + ------------ +            
 ```
 
 ## 🪜 Use Cases
