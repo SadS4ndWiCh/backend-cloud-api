@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/co
 
 import { PrismaService } from "src/providers/prisma/prisma.service";
 import { CreateFolderDTO, UpdateFolderDTO } from "./folders.dto";
+import { FolderVisibility } from "./folders.constant";
 
 @Injectable()
 export class FoldersService {
@@ -22,7 +23,7 @@ export class FoldersService {
             throw new NotFoundException();
         }
 
-        if (folder.user_id !== userId) {
+        if (folder.visiblity === FolderVisibility.PRIVATE && folder.user_id !== userId) {
             throw new UnauthorizedException();
         } 
 
@@ -41,7 +42,7 @@ export class FoldersService {
 
         return this.prisma.folder.update({
             where: { id: folderId },
-            data: { name: data.folderName }
+            data: { name: data.folderName, visiblity: data.visibility }
         });
     }
 
