@@ -4,28 +4,40 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { AuthGuard } from "../auth/auth.guard";
 
 import { FilesService } from "./files.service";
-import { UploadFileDTO } from "./files.dto";
+import { MoveFileDTO } from "./files.dto";
 
-@Controller("files")
+@Controller("folders/:folderId/files")
 export class FilesController {
     constructor(private files: FilesService) {}
 
     @UseGuards(AuthGuard)
-    @Get(":id")
-    async retrieveFile(@Request() req, @Param("id") fileId) {
-        return this.files.retrieveFile(req.userId, fileId);
+    @Get(":fileId")
+    async getFile(@Request() req, @Param("fileId") fileId: string, @Param("folderId") folderId: string) {
+        return this.files.getFile(req.userId, fileId, Number(folderId));
+    }
+
+    @UseGuards(AuthGuard)
+    @Get(":fileId/download")
+    async downloadFile(@Request() req, @Param("fileId") fileId: string, @Param("folderId") folderId: string) {
+        return this.files.downloadFile(req.userId, fileId, Number(folderId));
     }
 
     @UseGuards(AuthGuard)
     @Post()
     @UseInterceptors(FileInterceptor("file"))
-    async uploadFile(@Request() req, @UploadedFile() file: Express.Multer.File, @Body() body: UploadFileDTO) {
-        return this.files.uploadFile(req.userId, file, body);
+    async uploadFile(@Request() req, @UploadedFile() file: Express.Multer.File, @Param("folderId") folderId: string) {
+        return this.files.uploadFile(req.userId, file, Number(folderId));
     }
 
     @UseGuards(AuthGuard)
-    @Delete(":id")
-    async deleteFile(@Request() req, @Param("id") fileId: string) {
+    @Delete(":fileId")
+    async deleteFile(@Request() req, @Param("fileId") fileId: string) {
         return this.files.deleteFile(req.userId, fileId);
+    }
+
+    @UseGuards(AuthGuard)
+    @Post(":fileId/move")
+    async moveFileToFolder(@Request() req, @Param("fileId") fileId: string, @Body() body: MoveFileDTO) {
+        return this.files.moveFileToFolder(req.userId, fileId, body);
     }
 }

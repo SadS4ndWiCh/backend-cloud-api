@@ -12,16 +12,35 @@ import {
 import { PrismaService } from "src/providers/prisma/prisma.service";
 import { LocalBucketService } from "src/providers/localbucket/localbucket.service";
 
-import { UploadFileDTO } from "./files.dto";
+import { MoveFileDTO } from "./files.dto";
 import { MEGABYTE } from "./files.constant";
 
 @Injectable()
 export class FilesService {
     constructor(private prisma: PrismaService, private bucket: LocalBucketService) {}
 
-    async retrieveFile(userId: number, fileId: string) {
+    async getFile(userId: number, fileId: string, folderId: number) {
         const file = await this.prisma.file.findUnique({
-            where: { id: fileId },
+            where: { id: fileId, folder_id: folderId },
+            include: {
+                folder: true
+            }
+        });
+
+        if (!file) {
+            throw new NotFoundException();
+        }
+
+        if (file.folder.user_id !== userId) {
+            throw new UnauthorizedException();
+        }
+
+        return file;
+    }
+
+    async downloadFile(userId: number, fileId: string, folderId: number) {
+        const file = await this.prisma.file.findUnique({
+            where: { id: fileId, folder_id: folderId },
             include: {
                 folder: true
             }
@@ -39,12 +58,12 @@ export class FilesService {
         return new StreamableFile(fileStream);
     }
 
-    async uploadFile(ownerId: number, file: Express.Multer.File, data: UploadFileDTO) {
+    async uploadFile(ownerId: number, file: Express.Multer.File, folderId: number) {
         if (file.size > (200 * MEGABYTE)) {
             throw new BadRequestException("file size must be at least 200MB");
         }
 
-        const folder = await this.prisma.folder.findUnique({ where: { id: Number(data.folderId) } });
+        const folder = await this.prisma.folder.findUnique({ where: { id: folderId } });
         if (!folder) {
             throw new BadRequestException();
         }
@@ -94,5 +113,25 @@ export class FilesService {
 
         await this.bucket.deleteFile(file.file_path);
         return file;
+    }
+
+    async moveFileToFolder(userId: number, fileId: string, data: MoveFileDTO) {
+        const [file, folder] = await Promise.all([
+            this.prisma.file.findUnique({ where: { id: fileId }, include: { folder: true } }),
+            this.prisma.folder.findUnique({ where: { id: data.folderId } }),
+        ]);
+
+        if (!file || !folder) {
+            throw new NotFoundException();
+        }
+
+        if (file.folder.user_id !== userId || folder.user_id !== userId) {
+            throw new UnauthorizedException();
+        }
+
+        return this.prisma.file.update({
+            where: { id: fileId },
+            data: { folder_id: folder.id }
+        });
     }
 }
