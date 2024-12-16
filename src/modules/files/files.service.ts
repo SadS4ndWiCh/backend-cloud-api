@@ -56,7 +56,7 @@ export class FilesService {
             throw new UnauthorizedException();
         }
 
-        const fileStream = await this.bucket.streamFile(file.file_path);
+        const fileStream = await this.bucket.streamFile(file.path);
         return new StreamableFile(fileStream);
     }
 
@@ -75,7 +75,7 @@ export class FilesService {
         }
 
         const now = Date.now();
-        const fileName = `${now}_${file.filename}`;
+        const fileName = `${now}_${file.originalname}`;
         const hashedFileName = await this.bucket.createFile(fileName, file.buffer);
         if (!hashedFileName) {
             throw new InternalServerErrorException();
@@ -85,7 +85,10 @@ export class FilesService {
         return this.prisma.file.create({
             data: {
                 id: fileId,
-                file_path: hashedFileName,
+                name: file.originalname,
+                size: file.size,
+                mimetype: file.mimetype,
+                path: hashedFileName,
                 folder_id: folder.id,
             }
         });
@@ -113,7 +116,7 @@ export class FilesService {
             throw new InternalServerErrorException();
         }
 
-        await this.bucket.deleteFile(file.file_path);
+        await this.bucket.deleteFile(file.path);
         return file;
     }
 
