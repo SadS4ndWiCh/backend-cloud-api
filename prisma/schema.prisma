@@ -14,10 +14,11 @@ datasource db {
 }
 
 model User {
-    id        Int    @id @default(autoincrement())
-    full_name String
-    email     String @unique
-    password  String
+    id            Int    @id @default(autoincrement())
+    full_name     String
+    email         String @unique
+    password      String
+    storage_limit Int    @default(524288000)
 
     sessions Session[]
     folders  Folder[]
