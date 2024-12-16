@@ -50,7 +50,10 @@ model Folder {
 
 model File {
     id        String @id
-    file_path String
+    name      String
+    size      Int
+    mimetype  String
+    path      String
     folder_id Int
 
     folder Folder @relation(fields: [folder_id], references: [id])
