@@ -2,9 +2,11 @@ import { randomBytes } from "node:crypto";
 
 import {
     BadRequestException,
+    ForbiddenException,
     Injectable,
     InternalServerErrorException,
     NotFoundException,
+    PayloadTooLargeException,
     StreamableFile,
     UnauthorizedException
 } from "@nestjs/common";
@@ -62,7 +64,31 @@ export class FilesService {
 
     async uploadFile(ownerId: number, file: Express.Multer.File, folderId: number) {
         if (file.size > (200 * MEGABYTE)) {
-            throw new BadRequestException("file size must be at least 200MB");
+            throw new PayloadTooLargeException("file size must be at least 200MB");
+        }
+
+        // TODO: add `owner_id` to file table to improve query
+        const [user, folders] = await Promise.all([
+            this.prisma.user.findUnique({ where: { id: ownerId } }),
+            this.prisma.folder.findMany({
+                where: { user_id: ownerId },
+                select: { files: { select: { size: true } } }
+            })
+        ]);
+
+        // TODO: abstract the entire logic to get used storage size
+        let usedStorageSize = 0;
+        for (let folderIdx = 0; folderIdx < folders.length; folderIdx++) {
+            const folder = folders[folderIdx];
+
+            for (let fileIdx = 0; fileIdx < folder.files.length; fileIdx++) {
+                const file = folder.files[fileIdx];
+                usedStorageSize += file.size;
+            }
+        }
+
+        if ((usedStorageSize + file.size) > user.storage_limit) {
+            throw new ForbiddenException("you will exceed your maximum storage capacity.")
         }
 
         const folder = await this.prisma.folder.findUnique({ where: { id: folderId } });
